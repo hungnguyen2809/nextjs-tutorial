@@ -1,15 +1,61 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const SVNGilroy = localFont({
+  variable: "--font-svngilroy",
+  src: [
+    {
+      weight: "100",
+      style: "normal",
+      path: "./fonts/SVN-GilroyThin.otf",
+    },
+    {
+      weight: "100",
+      style: "italic",
+      path: "./fonts/SVN-GilroyThinItalic.otf",
+    },
+    {
+      weight: "400",
+      style: "normal",
+      path: "./fonts/SVN-GilroyRegular.otf",
+    },
+    {
+      weight: "400",
+      style: "italic",
+      path: "./fonts/SVN-GilroyItalic.otf",
+    },
+    {
+      weight: "500",
+      style: "normal",
+      path: "./fonts/SVN-GilroyMedium.otf",
+    },
+    {
+      weight: "500",
+      style: "italic",
+      path: "./fonts/SVN-GilroyMediumItalic.otf",
+    },
+    {
+      weight: "600",
+      style: "normal",
+      path: "./fonts/SVN-GilroySemiBold.otf",
+    },
+    {
+      weight: "600",
+      style: "italic",
+      path: "./fonts/SVN-GilroySemiBoldItalic.otf",
+    },
+    {
+      weight: "700",
+      style: "normal",
+      path: "./fonts/SVN-GilroyBold.otf",
+    },
+    {
+      weight: "700",
+      style: "italic",
+      path: "./fonts/SVN-GilroyBoldItalic.otf",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +71,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${SVNGilroy.className} ${SVNGilroy.variable} antialiased`}
       >
         {children}
       </body>
