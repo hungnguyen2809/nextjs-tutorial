@@ -8,52 +8,52 @@ const SVNGilroy = localFont({
     {
       weight: "100",
       style: "normal",
-      path: "./fonts/SVN-GilroyThin.otf",
+      path: "./../assets/fonts/SVN-GilroyThin.otf",
     },
     {
       weight: "100",
       style: "italic",
-      path: "./fonts/SVN-GilroyThinItalic.otf",
+      path: "./../assets/fonts/SVN-GilroyThinItalic.otf",
     },
     {
       weight: "400",
       style: "normal",
-      path: "./fonts/SVN-GilroyRegular.otf",
+      path: "./../assets/fonts/SVN-GilroyRegular.otf",
     },
     {
       weight: "400",
       style: "italic",
-      path: "./fonts/SVN-GilroyItalic.otf",
+      path: "./../assets/fonts/SVN-GilroyItalic.otf",
     },
     {
       weight: "500",
       style: "normal",
-      path: "./fonts/SVN-GilroyMedium.otf",
+      path: "./../assets/fonts/SVN-GilroyMedium.otf",
     },
     {
       weight: "500",
       style: "italic",
-      path: "./fonts/SVN-GilroyMediumItalic.otf",
+      path: "./../assets/fonts/SVN-GilroyMediumItalic.otf",
     },
     {
       weight: "600",
       style: "normal",
-      path: "./fonts/SVN-GilroySemiBold.otf",
+      path: "./../assets/fonts/SVN-GilroySemiBold.otf",
     },
     {
       weight: "600",
       style: "italic",
-      path: "./fonts/SVN-GilroySemiBoldItalic.otf",
+      path: "./../assets/fonts/SVN-GilroySemiBoldItalic.otf",
     },
     {
       weight: "700",
       style: "normal",
-      path: "./fonts/SVN-GilroyBold.otf",
+      path: "./../assets/fonts/SVN-GilroyBold.otf",
     },
     {
       weight: "700",
       style: "italic",
-      path: "./fonts/SVN-GilroyBoldItalic.otf",
+      path: "./../assets/fonts/SVN-GilroyBoldItalic.otf",
     },
   ],
 });
