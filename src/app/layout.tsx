@@ -4,6 +4,7 @@ import './globals.css';
 import Header from '@/components/commom/header';
 import { SVNGilroy } from '@/theme/fonts';
 import { ThemeProvider } from '@/theme/provider';
+import { Toaster } from '@/components/ui/sonner';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -21,6 +22,7 @@ export default function RootLayout({
         <ThemeProvider enableSystem attribute="class" defaultTheme="system" disableTransitionOnChange>
           <Header />
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -7,22 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ENV } from '@/configs/env';
-import { RegisterBody, RegisterBodyType } from '@/schemas/auth.schema';
+import { LoginBody, LoginBodyType } from '@/schemas/auth.schema';
 import { toast } from 'sonner';
 
-function RegisterForm() {
-  const form = useForm<RegisterBodyType>({
-    resolver: zodResolver(RegisterBody),
+function LoginForm() {
+  const form = useForm<LoginBodyType>({
+    resolver: zodResolver(LoginBody),
     defaultValues: {
-      name: '',
       email: '',
       password: '',
-      confirmPassword: '',
     },
   });
 
-  const onSubmitForm = async (values: RegisterBodyType) => {
-    const response = await fetch(`${ENV.NEXT_PUBLIC_API_ENDPOINT}/auth/register`, {
+  const onSubmitForm = async (values: LoginBodyType) => {
+    const response = await fetch(`${ENV.NEXT_PUBLIC_API_ENDPOINT}/auth/login`, {
       method: 'POST',
       body: JSON.stringify(values),
       headers: {
@@ -31,30 +29,28 @@ function RegisterForm() {
     });
 
     const result = await response.json();
-    if (response.ok) {
-      toast.success('Register success');
+    if (!response.ok) {
+      if (response.status == 422) {
+        const errors = (result.errors as { field: string; message: string }[]) || [];
+        errors.forEach((error) => {
+          if (error.field === 'email') {
+            form.setError('email', { type: 'server', message: error.message });
+          }
+          if (error.field === 'password') {
+            form.setError('password', { type: 'server', message: error.message });
+          }
+        });
+      } else {
+        toast.error(result.message || 'Login failed');
+      }
     } else {
-      toast.error(result.message);
+      toast.success('Login success');
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-4 w-[500px] border p-6 rounded-2xl shadow">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Họ tên</FormLabel>
-              <FormControl>
-                <Input type="text" placeholder="Nhập họ tên" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="email"
@@ -83,25 +79,12 @@ function RegisterForm() {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Xác nhận mật khẩu</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Nhập mật khẩu" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <Button className="w-full mt-8" type="submit">
-          Đăng ký
+          Đăng nhập
         </Button>
       </form>
     </Form>
   );
 }
 
-export default RegisterForm;
+export default LoginForm;
