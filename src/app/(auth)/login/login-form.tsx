@@ -2,15 +2,17 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ENV } from '@/configs/env';
+import { useAppContext } from '@/contexts/app-ctx';
 import { LoginBody, LoginBodyType } from '@/schemas/auth.schema';
-import { toast } from 'sonner';
 
 function LoginForm() {
+  const appCtx = useAppContext();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -45,6 +47,16 @@ function LoginForm() {
       }
     } else {
       toast.success('Login success');
+
+      //set token in context for client
+      appCtx.setSesstionToken(result.data.token);
+
+      //set token in cookie for server
+      fetch(`${window.location.origin}/api/auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: result.data.token }),
+      });
     }
   };
 
