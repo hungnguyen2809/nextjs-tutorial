@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 import Header from '@/components/commom/header';
+import SlideSession from '@/components/commom/slide-session';
 import { Toaster } from '@/components/ui/sonner';
 import { AppProvider } from '@/contexts/app-ctx';
 import { SVNGilroy } from '@/theme/fonts';
@@ -25,7 +26,11 @@ export default async function RootLayout({
       <body className={`${SVNGilroy.className} ${SVNGilroy.variable} antialiased w-screen h-screen`}>
         <ThemeProvider enableSystem attribute="class" defaultTheme="system" disableTransitionOnChange>
           <Header />
-          <AppProvider token={cookieStore.get('sessionToken')?.value}>{children}</AppProvider>
+          <AppProvider token={cookieStore.get('sessionToken')?.value}>
+            {children}
+
+            <SlideSession />
+          </AppProvider>
           <Toaster />
         </ThemeProvider>
       </body>

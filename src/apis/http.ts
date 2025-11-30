@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ENV } from '@/configs/env';
+import { redirect } from 'next/navigation';
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -20,6 +21,7 @@ export class HttpError extends Error {
 
 class SessionToken {
   private token: string = '';
+  private _expriesAt = new Date();
 
   get value() {
     return this.token;
@@ -30,6 +32,22 @@ class SessionToken {
       throw new Error('Cannot set token on server side');
     }
     this.token = token;
+  }
+
+  get expriesAt() {
+    return this._expriesAt;
+  }
+
+  set expriesAt(expriesAt: Date) {
+    if (typeof window === 'undefined') {
+      throw new Error('Cannot set expriesAt on server side');
+    }
+    this._expriesAt = expriesAt;
+  }
+
+  clear() {
+    this.value = '';
+    this._expriesAt = new Date();
   }
 }
 
@@ -55,6 +73,23 @@ const request = async <TResponse>(url: string, method: RequestMethod, options?: 
   const payload: TResponse & { message?: string } = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401) {
+      if (typeof window !== 'undefined') {
+        //logout from client
+        await fetch(`${window.location.origin}/api/logout`, {
+          method: 'POST',
+          body: JSON.stringify({ force: true }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+        clientSessionToken.clear();
+        window.location.href = '/login';
+      } else {
+        //logout from server: chuyển đến trang logout, vì chỉ có client mới logout đc
+        const sessionToken = (options?.headers as any)?.Authorization?.split(' ')[1] || '';
+        redirect(`/logout?sessionToken=${sessionToken}`);
+      }
+    }
+
     throw new HttpError(response.status, payload.message || 'Http Error', payload);
   }
 

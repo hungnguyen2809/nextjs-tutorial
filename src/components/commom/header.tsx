@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ButtonLogout from './button-logout';
 import { ModeToggle } from './mode-theme';
 
 function Header() {
@@ -14,6 +15,10 @@ function Header() {
           <Link className="underline" href={'/register'}>
             Đăng ký
           </Link>
+        </li>
+
+        <li>
+          <ButtonLogout />
         </li>
       </ul>
 

@@ -27,9 +27,10 @@ function LoginForm() {
 
       //set token in context for client
       clientSessionToken.value = data.data.token;
+      clientSessionToken.expriesAt = new Date(data.data.expiresAt);
 
       //set token in cookie for server
-      await authApi.auth(data.data.token);
+      await authApi.auth(clientSessionToken.value, clientSessionToken.expriesAt);
 
       toast.success('Login success');
       router.push('/me');
