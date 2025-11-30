@@ -1,4 +1,4 @@
-import { AccountResType } from '@/schemas/account.schema';
+import { AccountResType, UpdateMeBodyType } from '@/schemas/account.schema';
 import { http } from './http';
 
 export const accountApi = {
@@ -9,5 +9,8 @@ export const accountApi = {
   },
   meClient: () => {
     return http.get<AccountResType>('/account/me');
+  },
+  updateMe: (body: UpdateMeBodyType) => {
+    return http.put('/account/me', body);
   },
 };
