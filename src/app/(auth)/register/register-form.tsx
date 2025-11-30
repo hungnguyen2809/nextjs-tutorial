@@ -1,16 +1,18 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-
+import { authApi } from '@/apis/apiAuth';
+import { HttpError } from '@/apis/http';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ENV } from '@/configs/env';
 import { RegisterBody, RegisterBodyType } from '@/schemas/auth.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 function RegisterForm() {
+  const router = useRouter();
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
     defaultValues: {
@@ -22,19 +24,29 @@ function RegisterForm() {
   });
 
   const onSubmitForm = async (values: RegisterBodyType) => {
-    const response = await fetch(`${ENV.NEXT_PUBLIC_API_ENDPOINT}/auth/register`, {
-      method: 'POST',
-      body: JSON.stringify(values),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const result = await response.json();
-    if (response.ok) {
+    try {
+      await authApi.register(values);
       toast.success('Register success');
-    } else {
-      toast.error(result.message);
+
+      router.push('/login');
+    } catch (error) {
+      if (error instanceof HttpError) {
+        if (error.status == 422) {
+          const errors = (error?.data?.errors as { field: string; message: string }[]) || [];
+          errors.forEach((error) => {
+            if (error.field === 'email') {
+              form.setError('email', { type: 'server', message: error.message });
+            }
+            if (error.field === 'password') {
+              form.setError('password', { type: 'server', message: error.message });
+            }
+          });
+        } else {
+          toast.error(error.message || 'Login failed');
+        }
+      } else {
+        alert(JSON.stringify(error));
+      }
     }
   };
 

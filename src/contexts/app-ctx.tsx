@@ -1,29 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
-
-type AppContextType = {
-  sessionToken: string;
-  setSesstionToken: (token: string) => void;
-};
-
-export const AppContext = createContext<AppContextType>({ sessionToken: '', setSesstionToken: () => {} });
+import { clientSessionToken } from '@/apis/http';
+import React, { useState } from 'react';
 
 export const AppProvider = (props: { children: React.ReactNode; token?: string }) => {
-  const [token, setToken] = useState(props.token || '');
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      clientSessionToken.value = props.token || '';
+    }
+    // việc đổi từ useEffect sang useState: mục đích để component mount chắc chắn chạy đoạn này trước xong rồi mới đến logic trong useEffect
+  });
 
-  return (
-    <AppContext.Provider value={{ sessionToken: token, setSesstionToken: setToken }}>
-      {props.children}
-    </AppContext.Provider>
-  );
-};
-
-export const useAppContext = () => {
-  const ctx = useContext(AppContext);
-  if (ctx === null) {
-    throw new Error('useAppContext must be uesd inside AppProvider');
-  }
-
-  return ctx;
+  return <React.Fragment>{props.children}</React.Fragment>;
 };

@@ -1,28 +1,42 @@
 'use client';
 
+import { accountApi } from '@/apis/apiAccount';
+import { authApi } from '@/apis/apiAuth';
+import { HttpError, clientSessionToken } from '@/apis/http';
 import { Button } from '@/components/ui/button';
-import { ENV } from '@/configs/env';
-import { useAppContext } from '@/contexts/app-ctx';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 function Profile() {
-  const appCtx = useAppContext();
-
+  const router = useRouter();
   const onGetData = async () => {
-    const response = await fetch(`${ENV.NEXT_PUBLIC_API_ENDPOINT}/account/me`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${appCtx.sessionToken}`,
-      },
-    });
+    try {
+      const { data } = await accountApi.meClient();
+      alert(JSON.stringify(data.data));
+    } catch (error) {
+      if (error instanceof HttpError) {
+        toast.error(error.message);
+      }
+    }
+  };
 
-    const result = await response.json();
-    alert(JSON.stringify(result));
+  const onLogout = async () => {
+    try {
+      await authApi.logout();
+      clientSessionToken.value = '';
+      router.replace('/login');
+    } catch (error) {
+      if (error instanceof HttpError) {
+        toast.error(error.message);
+      }
+    }
   };
 
   return (
-    <div>
+    <div className="gap-2">
       <Button onClick={onGetData}>Get Me</Button>
+
+      <Button onClick={onLogout}>Logout</Button>
     </div>
   );
 }

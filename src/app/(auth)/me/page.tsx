@@ -1,24 +1,17 @@
-import { ENV } from '@/configs/env';
+import { accountApi } from '@/apis/apiAccount';
 import { cookies } from 'next/headers';
 import Profile from './profile';
 
 async function MePage() {
   const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('sessionToken')?.value ?? '';
 
-  const response = await fetch(`${ENV.NEXT_PUBLIC_API_ENDPOINT}/account/me`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${cookieStore.get('sessionToken')?.value}`,
-    },
-  });
-
-  const result = await response.json();
+  const { data } = await accountApi.me(sessionToken);
 
   return (
     <div>
       <h1>Profile</h1>
-      <div>{JSON.stringify(result.data)}</div>
+      <div>{JSON.stringify(data.data)}</div>
 
       <Profile />
     </div>

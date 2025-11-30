@@ -1,18 +1,18 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-
+import { authApi } from '@/apis/apiAuth';
+import { HttpError, clientSessionToken } from '@/apis/http';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ENV } from '@/configs/env';
-import { useAppContext } from '@/contexts/app-ctx';
 import { LoginBody, LoginBodyType } from '@/schemas/auth.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 function LoginForm() {
-  const appCtx = useAppContext();
+  const router = useRouter();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -22,41 +22,35 @@ function LoginForm() {
   });
 
   const onSubmitForm = async (values: LoginBodyType) => {
-    const response = await fetch(`${ENV.NEXT_PUBLIC_API_ENDPOINT}/auth/login`, {
-      method: 'POST',
-      body: JSON.stringify(values),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const result = await response.json();
-    if (!response.ok) {
-      if (response.status == 422) {
-        const errors = (result.errors as { field: string; message: string }[]) || [];
-        errors.forEach((error) => {
-          if (error.field === 'email') {
-            form.setError('email', { type: 'server', message: error.message });
-          }
-          if (error.field === 'password') {
-            form.setError('password', { type: 'server', message: error.message });
-          }
-        });
-      } else {
-        toast.error(result.message || 'Login failed');
-      }
-    } else {
-      toast.success('Login success');
+    try {
+      const { data } = await authApi.login(values);
 
       //set token in context for client
-      appCtx.setSesstionToken(result.data.token);
+      clientSessionToken.value = data.data.token;
 
       //set token in cookie for server
-      fetch(`${window.location.origin}/api/auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: result.data.token }),
-      });
+      await authApi.auth(data.data.token);
+
+      toast.success('Login success');
+      router.push('/me');
+    } catch (error) {
+      if (error instanceof HttpError) {
+        if (error.status == 422) {
+          const errors = (error?.data?.errors as { field: string; message: string }[]) || [];
+          errors.forEach((error) => {
+            if (error.field === 'email') {
+              form.setError('email', { type: 'server', message: error.message });
+            }
+            if (error.field === 'password') {
+              form.setError('password', { type: 'server', message: error.message });
+            }
+          });
+        } else {
+          toast.error(error.message || 'Login failed');
+        }
+      } else {
+        alert(JSON.stringify(error));
+      }
     }
   };
 
