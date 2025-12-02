@@ -7,6 +7,12 @@ function Header() {
     <section className="flex justify-between items-center">
       <ul className="flex gap-2">
         <li>
+          <Link className="underline" href={'/products'}>
+            Sản phẩm
+          </Link>
+        </li>
+
+        <li>
           <Link className="underline" href={'/login'}>
             Đăng nhập
           </Link>

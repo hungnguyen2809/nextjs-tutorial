@@ -6,7 +6,12 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
 export const decodeJWT = <TPayload = any>(token: string) => {
   if (!token) return null;
   return JWT.decode(token) as TPayload;
+};
+
+export const handleErrorMsg = () => {
+  //
 };
