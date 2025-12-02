@@ -54,9 +54,12 @@ class SessionToken {
 export const clientSessionToken = new SessionToken();
 
 const request = async <TResponse>(url: string, method: RequestMethod, options?: RequetsOptionType) => {
-  const body = options?.body ? JSON.stringify(options.body) : undefined;
-  const headers = {
-    'Content-Type': 'application/json',
+  const isFormData = options?.body instanceof FormData;
+  const body = options?.body ? (isFormData ? options?.body : JSON.stringify(options.body)) : undefined;
+
+  const headerContentType = isFormData ? {} : ({ 'Content-Type': 'application/json' } as HeadersInit);
+  const headers: HeadersInit = {
+    ...headerContentType,
     Authorization: clientSessionToken.value ? `Bearer ${clientSessionToken.value}` : '',
     ...options?.headers,
   };

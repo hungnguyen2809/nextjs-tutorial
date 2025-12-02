@@ -9,11 +9,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { CreateProductBody, CreateProductBodyType } from '@/schemas/product.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 function ProductAddForm() {
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
 
   const form = useForm<CreateProductBodyType>({
@@ -29,9 +32,18 @@ function ProductAddForm() {
   const onSubmitForm = async (values: CreateProductBodyType) => {
     try {
       console.log(values);
-      await apiProduct.create(values);
+      if (!file) {
+        form.setError('image', { message: 'File is not empty' });
+        return;
+      }
+
+      const fData = new FormData();
+      fData.append('file', file);
+      const uploadRes = await apiProduct.uploadImage(fData);
+      await apiProduct.create({ ...values, image: uploadRes.data.data });
 
       toast.success('Created success');
+      router.back();
     } catch (error) {
       if (error instanceof HttpError) {
         if (error.status == 422) {
@@ -101,6 +113,7 @@ function ProductAddForm() {
               <FormLabel>Hình ảnh</FormLabel>
               <FormControl>
                 <Input
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   placeholder="Mô tả"
@@ -124,10 +137,14 @@ function ProductAddForm() {
 
             <Button
               size={'sm'}
+              type="button"
               variant={'destructive'}
               onClick={() => {
                 setFile(null);
                 form.setValue('image', '');
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                }
               }}
             >
               Xóa

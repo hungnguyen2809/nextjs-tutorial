@@ -8,7 +8,7 @@ import {
 import { http } from './http';
 
 export const authApi = {
-  auth: (token: string, expiresAt: Date) => {
+  auth: (token: string, expiresAt: string) => {
     return http.post('/api/auth', { token, expiresAt }, { baseUrl: window.location.origin });
   },
   logout: (force?: boolean) => {

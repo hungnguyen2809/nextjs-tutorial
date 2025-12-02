@@ -6,6 +6,9 @@ export const apiProduct = {
     return http.get<ProductListResType>('/products');
   },
   create: (body: CreateProductBodyType) => {
-    return http.post<ProductResType>('/product', body);
+    return http.post<ProductResType>('/products', body);
+  },
+  uploadImage: (body: FormData) => {
+    return http.post<{ data: string }>('/media/upload', body);
   },
 };
