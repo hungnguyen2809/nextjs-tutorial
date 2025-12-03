@@ -2,8 +2,11 @@ import { CreateProductBodyType, ProductListResType, ProductResType } from '@/sch
 import { http } from './http';
 
 export const apiProduct = {
-  get: () => {
+  getList: () => {
     return http.get<ProductListResType>('/products');
+  },
+  getDetail: (id: string) => {
+    return http.get<ProductResType>(`/products/${id}`);
   },
   create: (body: CreateProductBodyType) => {
     return http.post<ProductResType>('/products', body);
