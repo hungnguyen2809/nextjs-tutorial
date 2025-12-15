@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { CreateProductBody, CreateProductBodyType } from '@/schemas/product.schema';
+import { CreateProductBody, CreateProductBodyType, ProductResType } from '@/schemas/product.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -14,7 +14,11 @@ import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-function ProductAddForm() {
+type Props = {
+  productInfo?: ProductResType | null;
+};
+
+function ProductForm({ productInfo }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -22,14 +26,24 @@ function ProductAddForm() {
   const form = useForm<CreateProductBodyType>({
     resolver: zodResolver(CreateProductBody),
     defaultValues: {
-      name: '',
-      price: 0,
-      image: '',
-      description: '',
+      name: productInfo?.data.name ?? '',
+      price: productInfo?.data.price ?? 0,
+      image: productInfo?.data.image ?? '',
+      description: productInfo?.data.description ?? '',
     },
   });
 
+  const imageData = form.watch('image');
+
   const onSubmitForm = async (values: CreateProductBodyType) => {
+    if (productInfo?.data) {
+      handleUpdateProduct(values);
+    } else {
+      handleCreateProduct(values);
+    }
+  };
+
+  const handleCreateProduct = async (values: CreateProductBodyType) => {
     try {
       console.log(values);
       if (!file) {
@@ -44,6 +58,7 @@ function ProductAddForm() {
 
       toast.success('Created success');
       router.back();
+      router.refresh();
     } catch (error) {
       if (error instanceof HttpError) {
         if (error.status == 422) {
@@ -53,6 +68,36 @@ function ProductAddForm() {
           });
         } else {
           toast.error(error.message || 'Created failed');
+        }
+      } else {
+        alert(JSON.stringify(error));
+      }
+    }
+  };
+
+  const handleUpdateProduct = async (values: CreateProductBodyType) => {
+    try {
+      console.log(values);
+      let filePath = imageData;
+
+      if (file) {
+        const fData = new FormData();
+        fData.append('file', file);
+        const uploadRes = await apiProduct.uploadImage(fData);
+        filePath = uploadRes.data.data;
+      }
+
+      await apiProduct.update(productInfo?.data.id as number, { ...values, image: filePath });
+      toast.success('Update success');
+    } catch (error) {
+      if (error instanceof HttpError) {
+        if (error.status == 422) {
+          const errors = (error?.data?.errors as { field: keyof CreateProductBodyType; message: string }[]) || [];
+          errors.forEach((error) => {
+            form.setError(error.field, { type: 'server', message: error.message });
+          });
+        } else {
+          toast.error(error.message || 'Update failed');
         }
       } else {
         alert(JSON.stringify(error));
@@ -131,9 +176,15 @@ function ProductAddForm() {
           )}
         />
 
-        {file ? (
+        {file || imageData ? (
           <div>
-            <Image src={URL.createObjectURL(file)} alt={'preview'} width={128} height={128} className="object-cover" />
+            <Image
+              alt={'preview'}
+              width={128}
+              height={128}
+              className="object-cover"
+              src={file ? URL.createObjectURL(file) : imageData}
+            />
 
             <Button
               size={'sm'}
@@ -153,11 +204,11 @@ function ProductAddForm() {
         ) : null}
 
         <Button className="w-full mt-8" type="submit">
-          Tạo mới
+          {productInfo?.data ? 'Cập nhật' : 'Thêm mới'}
         </Button>
       </form>
     </Form>
   );
 }
 
-export default ProductAddForm;
+export default ProductForm;

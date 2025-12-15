@@ -1,9 +1,12 @@
 import { apiProduct } from '@/apis/apiProduct';
 import { Button } from '@/components/ui/button';
+import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
+import ButtonDeleteProduct from './_components/button-delete';
 
 async function ProductListPage() {
+  const sessionToken = (await cookies()).get('sessionToken')?.value;
   const resList = await apiProduct.getList();
   const productList = resList.data.data;
 
@@ -19,7 +22,7 @@ async function ProductListPage() {
         </li>
       </ul>
 
-      <div>List</div>
+      <div>List of product</div>
       <table>
         <thead>
           <tr>
@@ -27,7 +30,8 @@ async function ProductListPage() {
             <th>Image</th>
             <th>Name</th>
             <th>Price</th>
-            <th>Action</th>
+            <th>Description</th>
+            {sessionToken ? <th>Action</th> : null}
           </tr>
         </thead>
         <tbody>
@@ -44,15 +48,18 @@ async function ProductListPage() {
                 <p>{item.price}</p>
               </td>
               <td>
-                <div>
-                  <Link className="text-blue-500" href={`/products/${item.id}`}>
-                    Edit
-                  </Link>
-                  <Link className="text-red-500" href={'#'}>
-                    Delete
-                  </Link>
-                </div>
+                <p>{item.description}</p>
               </td>
+              {sessionToken ? (
+                <td>
+                  <div className="flex gap-2">
+                    <Link className="text-blue-500" href={`/products/${item.id}`}>
+                      Edit
+                    </Link>
+                    <ButtonDeleteProduct productId={item.id} />
+                  </div>
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>

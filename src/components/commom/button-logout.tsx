@@ -16,6 +16,8 @@ function ButtonLogout() {
       if (error instanceof HttpError) {
         toast.error(error.message);
       }
+    } finally {
+      router.refresh();
     }
   };
 

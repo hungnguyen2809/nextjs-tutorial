@@ -33,7 +33,8 @@ function LoginForm() {
       await authApi.auth(clientSessionToken.value, data.data.expiresAt);
 
       toast.success('Login success');
-      router.push('/me');
+      router.push('/');
+      router.refresh();
     } catch (error) {
       if (error instanceof HttpError) {
         if (error.status == 422) {

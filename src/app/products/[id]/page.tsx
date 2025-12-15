@@ -1,6 +1,6 @@
 import { apiProduct } from '@/apis/apiProduct';
 import { ProductResType } from '@/schemas/product.schema';
-import React from 'react';
+import ProductForm from '../_components/product-form';
 
 async function EditProductPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -16,8 +16,9 @@ async function EditProductPage(props: { params: Promise<{ id: string }> }) {
   return (
     <div>
       <h1>EditProductPage</h1>
-
       {productInfo ? <div>{productInfo.data.name}</div> : <p>Product not found with id = {id}</p>}
+
+      <ProductForm productInfo={productInfo} />
     </div>
   );
 }
