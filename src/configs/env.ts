@@ -1,10 +1,12 @@
 import z from 'zod';
 
 const envSchame = z.object({
+  NEXT_PUBLIC_URL: z.string(),
   NEXT_PUBLIC_API_ENDPOINT: z.string(),
 });
 
 const envServer = envSchame.safeParse({
+  NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
   NEXT_PUBLIC_API_ENDPOINT: process.env.NEXT_PUBLIC_API_ENDPOINT,
 });
 

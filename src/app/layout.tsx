@@ -10,6 +10,7 @@ import { AccountResType } from '@/schemas/account.schema';
 import { SVNGilroy } from '@/theme/fonts';
 import { ThemeProvider } from '@/theme/provider';
 import { cookies } from 'next/headers';
+import { baseOpenGraph } from './shared-metadata';
 
 export const metadata: Metadata = {
   title: {
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
     template: '%s | Hùng Shop',
   },
   description: 'Chuyên các loại sản phẩm mới nhất trên thị trường, giá cả phải chăng',
+  openGraph: baseOpenGraph,
 };
 
 export default async function RootLayout({

@@ -1,4 +1,6 @@
 import { apiProduct } from '@/apis/apiProduct';
+import { baseOpenGraph } from '@/app/shared-metadata';
+import { ENV } from '@/configs/env';
 import { ProductResType } from '@/schemas/product.schema';
 import { Metadata, ResolvingMetadata } from 'next';
 import Image from 'next/image';
@@ -26,9 +28,25 @@ export async function generateMetadata({ params }: Props, parent: ResolvingMetad
     console.log(error);
   }
 
+  const urlPage = ENV.NEXT_PUBLIC_URL + '/products/' + productInfo?.data.id;
+
   return {
     title: productInfo?.data.name,
     description: productInfo?.data.description,
+    openGraph: {
+      ...baseOpenGraph,
+      title: productInfo?.data.name,
+      description: productInfo?.data.description,
+      url: urlPage,
+      images: [
+        {
+          url: productInfo?.data.image ?? '',
+        },
+      ],
+    },
+    alternates: {
+      canonical: urlPage,
+    },
   };
 }
 
