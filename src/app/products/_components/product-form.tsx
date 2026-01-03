@@ -89,6 +89,7 @@ function ProductForm({ productInfo }: Props) {
 
       await apiProduct.update(productInfo?.data.id as number, { ...values, image: filePath });
       toast.success('Update success');
+      router.refresh();
     } catch (error) {
       if (error instanceof HttpError) {
         if (error.status == 422) {

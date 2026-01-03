@@ -1,9 +1,15 @@
 import { apiProduct } from '@/apis/apiProduct';
 import { Button } from '@/components/ui/button';
+import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import ButtonDeleteProduct from './_components/button-delete';
+
+export const metadata: Metadata = {
+  title: 'Sản phẩm',
+  description: 'Danh sách sản phẩm xịn nhất',
+};
 
 async function ProductListPage() {
   const sessionToken = (await cookies()).get('sessionToken')?.value;
@@ -50,16 +56,21 @@ async function ProductListPage() {
               <td>
                 <p>{item.description}</p>
               </td>
-              {sessionToken ? (
-                <td>
-                  <div className="flex gap-2">
-                    <Link className="text-blue-500" href={`/products/${item.id}`}>
-                      Edit
-                    </Link>
-                    <ButtonDeleteProduct productId={item.id} />
-                  </div>
-                </td>
-              ) : null}
+              <td>
+                <div className="flex gap-2">
+                  <Link className="text-gray-500" href={`/products/${item.id}`}>
+                    Detail
+                  </Link>
+                  {sessionToken ? (
+                    <>
+                      <Link className="text-blue-500" href={`/products/${item.id}/edit`}>
+                        Edit
+                      </Link>
+                      <ButtonDeleteProduct productId={item.id} />
+                    </>
+                  ) : null}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

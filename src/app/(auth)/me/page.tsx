@@ -1,7 +1,13 @@
 import { accountApi } from '@/apis/apiAccount';
+import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Profile from './profile';
 import ProfileForm from './profile-form';
+
+export const metadata: Metadata = {
+  title: 'Thông tin người dùng',
+  description: 'Quản lý thông tin người dùng',
+};
 
 async function MePage() {
   const cookieStore = await cookies();

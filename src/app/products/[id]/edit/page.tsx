@@ -1,11 +1,9 @@
 import { apiProduct } from '@/apis/apiProduct';
 import { ProductResType } from '@/schemas/product.schema';
 import { Metadata, ResolvingMetadata } from 'next';
-import Image from 'next/image';
 import { cache } from 'react';
+import ProductForm from '../../_components/product-form';
 
-//dùng cái này để cahce lại không call api liên tục tới serrve vì,api detail này đang để là no-cahce
-// => vào detail nó call api 2 lần: 1 lần get metadata, 1 lần lấy chi tiết product
 const getDetail = cache(apiProduct.getDetail);
 
 type Props = {
@@ -27,12 +25,12 @@ export async function generateMetadata({ params }: Props, parent: ResolvingMetad
   }
 
   return {
-    title: productInfo?.data.name,
+    title: 'Cập nhật: ' + productInfo?.data.name,
     description: productInfo?.data.description,
   };
 }
 
-async function DetailProductPage(props: Props) {
+async function EditProductPage(props: Props) {
   const { id } = await props.params;
   let productInfo: ProductResType | null = null;
 
@@ -45,26 +43,12 @@ async function DetailProductPage(props: Props) {
 
   return (
     <div>
-      <h1>DetailProductPage</h1>
-      {productInfo ? (
-        <div>
-          <p>Name: {productInfo.data.name}</p>
-          <p>Price: {productInfo.data.price}</p>
-          <p>Description: {productInfo.data.description}</p>
-          <p>Image:</p>
-          <Image
-            src={productInfo.data.image}
-            alt={productInfo.data.name}
-            width={100}
-            height={100}
-            className="object-cover w-32 h-32"
-          />
-        </div>
-      ) : (
-        <p>Product not found with id = {id}</p>
-      )}
+      <h1>EditProductPage</h1>
+      {productInfo ? <div>{productInfo.data.name}</div> : <p>Product not found with id = {id}</p>}
+
+      <ProductForm productInfo={productInfo} />
     </div>
   );
 }
 
-export default DetailProductPage;
+export default EditProductPage;
