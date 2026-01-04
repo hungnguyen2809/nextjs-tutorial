@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ENV } from '@/configs/env';
+import { AppStorage } from '@/lib/storage';
 import { redirect } from 'next/navigation';
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -19,48 +20,25 @@ export class HttpError extends Error {
   }
 }
 
-class SessionToken {
-  private token: string = '';
-  private _expriesAt = new Date();
-
-  get value() {
-    return this.token;
-  }
-
-  set value(token: string) {
-    if (typeof window === 'undefined') {
-      throw new Error('Cannot set token on server side');
-    }
-    this.token = token;
-  }
-
-  get expriesAt() {
-    return this._expriesAt;
-  }
-
-  set expriesAt(expriesAt: Date) {
-    if (typeof window === 'undefined') {
-      throw new Error('Cannot set expriesAt on server side');
-    }
-    this._expriesAt = expriesAt;
-  }
-
-  clear() {
-    this.value = '';
-    this._expriesAt = new Date();
-  }
-}
-
-export const clientSessionToken = new SessionToken();
+export const isClient = () => typeof window !== 'undefined';
 
 const request = async <TResponse>(url: string, method: RequestMethod, options?: RequetsOptionType) => {
-  const isFormData = options?.body instanceof FormData;
-  const body = options?.body ? (isFormData ? options?.body : JSON.stringify(options.body)) : undefined;
+  let body: FormData | string | undefined = undefined;
+  if (options?.body instanceof FormData) {
+    body = options.body;
+  } else if (options?.body) {
+    body = JSON.stringify(options.body);
+  }
 
-  const headerContentType = isFormData ? {} : ({ 'Content-Type': 'application/json' } as HeadersInit);
+  let sessionToken: string | null = null;
+  if (isClient()) {
+    sessionToken = AppStorage.getSessionToken();
+  }
+
+  const baseHeader = body instanceof FormData ? {} : ({ 'Content-Type': 'application/json' } as HeadersInit);
   const headers: HeadersInit = {
-    ...headerContentType,
-    Authorization: clientSessionToken.value ? `Bearer ${clientSessionToken.value}` : '',
+    ...baseHeader,
+    Authorization: sessionToken ? `Bearer ${sessionToken}` : '',
     ...options?.headers,
   };
   const baseUrl = options?.baseUrl ? options?.baseUrl : ENV.NEXT_PUBLIC_API_ENDPOINT;
@@ -77,15 +55,20 @@ const request = async <TResponse>(url: string, method: RequestMethod, options?: 
 
   if (!response.ok) {
     if (response.status === 401) {
-      if (typeof window !== 'undefined') {
+      if (isClient()) {
         //logout from client
-        await fetch(`${window.location.origin}/api/logout`, {
-          method: 'POST',
-          body: JSON.stringify({ force: true }),
-          headers: { 'Content-Type': 'application/json' },
-        });
-        clientSessionToken.clear();
-        window.location.href = '/login';
+        try {
+          await fetch(`${window.location.origin}/api/logout`, {
+            method: 'POST',
+            body: JSON.stringify({ force: true }),
+            headers: { 'Content-Type': 'application/json' },
+          });
+        } catch (error) {
+          console.log(error);
+        } finally {
+          AppStorage.clearSession();
+          window.location.href = '/login';
+        }
       } else {
         //logout from server: chuyển đến trang logout, vì chỉ có client mới logout đc
         const sessionToken = (options?.headers as any)?.Authorization?.split(' ')[1] || '';

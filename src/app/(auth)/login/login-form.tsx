@@ -1,10 +1,11 @@
 'use client';
 
 import { authApi } from '@/apis/apiAuth';
-import { HttpError, clientSessionToken } from '@/apis/http';
+import { HttpError } from '@/apis/http';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { AppStorage } from '@/lib/storage';
 import { LoginBody, LoginBodyType } from '@/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -26,11 +27,14 @@ function LoginForm() {
       const { data } = await authApi.login(values);
 
       //set token in context for client
-      clientSessionToken.value = data.data.token;
-      clientSessionToken.expriesAt = new Date(data.data.expiresAt);
+      const token = data.data.token;
+      const expriesAt = new Date(data.data.expiresAt);
+
+      AppStorage.setSessionToken(token);
+      AppStorage.setSessionTokenExpireAt(expriesAt.toISOString());
 
       //set token in cookie for server
-      await authApi.auth(clientSessionToken.value, data.data.expiresAt);
+      await authApi.auth(token, data.data.expiresAt);
 
       toast.success('Login success');
       router.push('/');

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
-import { accountApi } from '@/apis/apiAccount';
 import Header from '@/components/commom/header';
 import SlideSession from '@/components/commom/slide-session';
 import { Toaster } from '@/components/ui/sonner';
@@ -9,7 +8,6 @@ import { AppProvider } from '@/contexts/app-ctx';
 import { AccountResType } from '@/schemas/account.schema';
 import { SVNGilroy } from '@/theme/fonts';
 import { ThemeProvider } from '@/theme/provider';
-import { cookies } from 'next/headers';
 import { baseOpenGraph } from './shared-metadata';
 
 export const metadata: Metadata = {
@@ -27,24 +25,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('sessionToken')?.value;
-
-  let accountInfo: AccountResType['data'] | null = null;
-  try {
-    if (sessionToken) {
-      const response = await accountApi.me(sessionToken);
-      accountInfo = response.data.data;
-    }
-  } catch (error) {
-    console.log(error);
-  }
+  const accountInfo: AccountResType['data'] | null = null;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${SVNGilroy.className} ${SVNGilroy.variable} antialiased w-screen h-screen`}>
         <ThemeProvider enableSystem attribute="class" defaultTheme="system" disableTransitionOnChange>
-          <AppProvider token={sessionToken} accountInfo={accountInfo}>
+          <AppProvider accountInfo={accountInfo}>
             <Header accountInfo={accountInfo} />
             {children}
             <SlideSession />

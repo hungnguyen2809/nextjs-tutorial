@@ -1,6 +1,7 @@
 'use client';
 import { authApi } from '@/apis/apiAuth';
-import { clientSessionToken, HttpError } from '@/apis/http';
+import { HttpError } from '@/apis/http';
+import { AppStorage } from '@/lib/storage';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -10,7 +11,7 @@ function ButtonLogout() {
   const onLogout = async () => {
     try {
       await authApi.logout();
-      clientSessionToken.clear();
+      AppStorage.clearSession();
       router.replace('/login');
     } catch (error) {
       if (error instanceof HttpError) {
