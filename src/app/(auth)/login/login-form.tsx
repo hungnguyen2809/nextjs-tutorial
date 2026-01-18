@@ -5,6 +5,7 @@ import { HttpError } from '@/apis/http';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useAppContext } from '@/contexts/app-ctx';
 import { AppStorage } from '@/lib/storage';
 import { LoginBody, LoginBodyType } from '@/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +23,8 @@ function LoginForm() {
     },
   });
 
+  const { setAccountInfo } = useAppContext();
+
   const onSubmitForm = async (values: LoginBodyType) => {
     try {
       const { data } = await authApi.login(values);
@@ -32,6 +35,8 @@ function LoginForm() {
 
       AppStorage.setSessionToken(token);
       AppStorage.setSessionTokenExpireAt(expriesAt.toISOString());
+      AppStorage.setAccountInfo(data.data.account);
+      setAccountInfo(data.data.account);
 
       //set token in cookie for server
       await authApi.auth(token, data.data.expiresAt);

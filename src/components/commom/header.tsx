@@ -1,9 +1,13 @@
-import { AccountResType } from '@/schemas/account.schema';
+'use client';
+
+import { useAppContext } from '@/contexts/app-ctx';
 import Link from 'next/link';
 import ButtonLogout from './button-logout';
 import { ModeToggle } from './mode-theme';
 
-function Header({ accountInfo }: { accountInfo: AccountResType['data'] | null }) {
+function Header() {
+  const { accountInfo } = useAppContext();
+
   // const tokenSesssion = (await cookies()).get('sessionToken')?.value;
   // let accountInfo: AccountResType['data'] | null = null;
 

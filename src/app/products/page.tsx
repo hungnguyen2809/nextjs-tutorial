@@ -1,10 +1,10 @@
 import { apiProduct } from '@/apis/apiProduct';
-import { Button } from '@/components/ui/button';
+import { ProductListResType } from '@/schemas/product.schema';
 import { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
-import ButtonDeleteProduct from './_components/button-delete';
+import ButtonAddProduct from './_components/button-add-product';
+import ButtonListAction from './_components/button-list-action';
 
 export const metadata: Metadata = {
   title: 'Sản phẩm',
@@ -12,21 +12,20 @@ export const metadata: Metadata = {
 };
 
 async function ProductListPage() {
-  const sessionToken = (await cookies()).get('sessionToken')?.value;
-  const resList = await apiProduct.getList();
-  const productList = resList.data.data;
+  let productList: ProductListResType['data'] = [];
+
+  try {
+    const resList = await apiProduct.getList();
+    productList = resList.data.data;
+  } catch (error) {
+    console.log(error);
+  }
 
   return (
     <div>
       <h1>ProductListPage</h1>
 
-      <ul className="flex gap-2">
-        <li>
-          <Link className="underline" href={'/products/add'}>
-            <Button>Thêm mới</Button>
-          </Link>
-        </li>
-      </ul>
+      <ButtonAddProduct />
 
       <div>List of product</div>
       <table>
@@ -37,7 +36,7 @@ async function ProductListPage() {
             <th>Name</th>
             <th>Price</th>
             <th>Description</th>
-            {sessionToken ? <th>Action</th> : null}
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -61,14 +60,7 @@ async function ProductListPage() {
                   <Link className="text-gray-500" href={`/products/${item.id}`}>
                     Detail
                   </Link>
-                  {sessionToken ? (
-                    <>
-                      <Link className="text-blue-500" href={`/products/${item.id}/edit`}>
-                        Edit
-                      </Link>
-                      <ButtonDeleteProduct productId={item.id} />
-                    </>
-                  ) : null}
+                  <ButtonListAction product={item} />
                 </div>
               </td>
             </tr>

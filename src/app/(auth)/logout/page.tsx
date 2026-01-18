@@ -1,11 +1,13 @@
 'use client';
 import { authApi } from '@/apis/apiAuth';
+import { useAppContext } from '@/contexts/app-ctx';
 import { AppStorage } from '@/lib/storage';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 function Logout() {
   const searchParams = useSearchParams();
+  const { setAccountInfo } = useAppContext();
 
   useEffect(() => {
     const sessionToken = searchParams.get('sessionToken');
@@ -15,11 +17,12 @@ function Logout() {
       const handle = async () => {
         await authApi.logout(true);
         AppStorage.clearSession();
+        setAccountInfo(null);
         window.location.href = '/login';
       };
       handle();
     }
-  }, [searchParams]);
+  }, [searchParams, setAccountInfo]);
 
   return <div>Logout...</div>;
 }
